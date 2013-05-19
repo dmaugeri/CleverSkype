@@ -5,11 +5,9 @@ Created on May 18, 2013
 '''
 import Skype4Py
 import cleverbot
-import logging
 import time
 from pprint import pprint
 
-logger = logging.getLogger('CleverSkype')
 class CleverSkype:
     
     def __init__(self):
@@ -18,9 +16,7 @@ class CleverSkype:
         self.messageIndex = 0;
         self.running = False
         self.skype = Skype4Py.Skype()
-        logger.debug('Attaching to skype...')
         self.skype.Attach()
-        logger.debug('Connection established...')
         
     def start(self):
         self.running = True
@@ -50,14 +46,11 @@ class CleverSkype:
         
         #if it is the first message being send...
         if self.messageIndex == 0:
-            logger.debug('sending initial message')
             msg.Chat.SendMessage('%s isn\'t here right now, but feel free to talk to me, Cleverbot, in the mean time' 
                                  % (self.skype.CurrentUser.FullName))
         else:
-            logger.debug('getting response from cleverbot...')
             response = self.cb.Ask(msg.Body) 
             msg.Chat.SendMessage(response)
-            logger.debug('message from cleverbot sent')
         
         self.messageIndex = self.messageIndex + 1
         
