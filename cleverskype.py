@@ -7,13 +7,17 @@ import Skype4Py
 import cleverbot
 import time
 from pprint import pprint
+import utils
 
 class CleverSkype:
     
     def __init__(self):
+        pprint("Starting Cleverbot session...")
         self.cb = cleverbot.Session()
-        #keeps track of whether the first message has been sent or not
-        self.messageIndex = 0;
+        pprint("Cleverbot session created.")
+        
+        #keeps track of the chats that the bot has spoken too
+        self.chats = {}
         self.running = False
         pprint("Creating skype...")
         self.skype = Skype4Py.Skype()
@@ -21,14 +25,25 @@ class CleverSkype:
         pprint("Skype attached.")
         
     def start(self):
-        pprint("Starting Cleverbot to receive messages")
+        """
+        Used to start the bot to listen for incoming messages
+        """
+        
+        pprint("Starting Cleverbot to receive messages.")
         self.running = True
         self.skype.OnMessageStatus = self.handleMessages
     
     #stops responding to messages
     def stop(self):
+        """
+        Used to stop listening to incoming messages
+            
+        The bot is still attached to skype    
+        """
         pprint("Stopping Cleverbot from receiving messages")
-        self.messageIndex = 0
+        
+        #reset all the chats the bot has spoken too
+        self.chats = {}
         self.running = False
         self.skype.OnMessageStatus = self.doNothing     
     
@@ -36,6 +51,10 @@ class CleverSkype:
         pass
     
     def handleMessages(self, msg, status):
+        """
+        Handle incoming messages
+        """
+        
         if status != Skype4Py.cmsReceived:
             return;
         
@@ -48,40 +67,58 @@ class CleverSkype:
         if status == "READ":
             return
         
+        chat = msg.Chat
         
         #if it is the first message being sent...
-        if self.messageIndex == 0:
-            pprint("First Message Received..")
-            msg.Chat.SendMessage('%s isn\'t here right now, but feel free to talk to me, Cleverbot, in the mean time' 
-                                 % (self.skype.CurrentUser.FullName))
-            pprint("First Message Sent")
+        chat_id = utils.get_chat_id(chat)
+        
+        if  chat not in self.chats.values():
+            self.chats[chat_id] = chat
+            pprint("Sending initial message...")
+            pprint(self.sendMessage(chat_id, '%s isn\'t here right now, but feel free to talk to me, Cleverbot, in the mean time' 
+                                 % (self.skype.CurrentUser.FullName)))
         else:
             pprint("Asking Cleverbot...")
             response = self.cb.Ask(msg.Body) 
-            msg.Chat.SendMessage(response)
-            pprint("Cleverbot's response sent.")
+            pprint("Sending Cleverbot's response...")
+            pprint(self.sendMessage(chat_id, response))
+            
+    def sendMessage(self, chat_id, msg):
+        """
+        Send Message to chat
         
-        self.messageIndex = self.messageIndex + 1
+        :param: chat_id is the string id of a chat
+        
+        :param: msg is a UTF-8 encoded string
+        """
+        try:
+            self.chats[chat_id].SendMessage(msg)
+            return "Message sent"
+        except KeyError:
+            raise RuntimeError("No chat %s" % chat_id)
+        
         
     def getSkype(self):
-        #returns skype instance
+        """
+        Exposes skype allows for stateful modules
+            
+        :return: Active Skype4Py instance
+        """
         return self.skype
-        
-
+    
 def main():
     cleverSkype = CleverSkype()
     skype = cleverSkype.getSkype()
       
     while True:
         if skype.CurrentUser.OnlineStatus != Skype4Py.cusDoNotDisturb:
+            
             if cleverSkype.running:
-                pprint("stopping...")
                 cleverSkype.stop()
         else:
             if not cleverSkype.running:
-                pprint("starting...")
                 cleverSkype.start()
-        time.sleep(1)  
+        time.sleep(0.5)  
     
 if __name__ == '__main__':
     main()
