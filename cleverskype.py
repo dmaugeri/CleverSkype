@@ -44,7 +44,7 @@ class CleverSkype:
         if status == "READ":
             return
         
-        #if it is the first message being send...
+        #if it is the first message being sent...
         if self.messageIndex == 0:
             msg.Chat.SendMessage('%s isn\'t here right now, but feel free to talk to me, Cleverbot, in the mean time' 
                                  % (self.skype.CurrentUser.FullName))
