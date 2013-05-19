@@ -7,4 +7,4 @@ https://code.google.com/p/pycleverbot/
 https://github.com/awahlig/skype4py
 
 Have an instance of skype open run and run the program, whenever
-your skype is set to "Do Not Disturb" CleverSkype will run.
+your skype is set to "Do Not Disturb" CleverSkype will talk to those who message you.
