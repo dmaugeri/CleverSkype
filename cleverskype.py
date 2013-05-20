@@ -76,14 +76,14 @@ class CleverSkype:
             self.chats[chat_id] = chat
             pprint("Sending initial message...")
             pprint(self.sendMessage(chat_id, '%s isn\'t here right now, but feel free to talk to me, Cleverbot, in the mean time' 
-                                 % (self.skype.CurrentUser.FullName)))
+                                 % (self.skype.CurrentUser.FullName), msg.FromHandle))
         else:
             pprint("Asking Cleverbot...")
             response = self.cb.Ask(msg.Body) 
             pprint("Sending Cleverbot's response...")
-            pprint(self.sendMessage(chat_id, response))
+            pprint(self.sendMessage(chat_id, response, msg.FromHandle))
             
-    def sendMessage(self, chat_id, msg):
+    def sendMessage(self, chat_id, msg, person):
         """
         Send Message to chat
         
@@ -93,7 +93,7 @@ class CleverSkype:
         """
         try:
             self.chats[chat_id].SendMessage(msg)
-            return "Message sent"
+            return 'Message to %s sent' %(person)
         except KeyError:
             raise RuntimeError("No chat %s" % chat_id)
         
