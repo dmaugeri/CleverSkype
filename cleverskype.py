@@ -110,7 +110,7 @@ def main():
     cleverSkype = CleverSkype()
     skype = cleverSkype.getSkype()
       
-    while True:
+    while 1:
         if skype.CurrentUser.OnlineStatus != Skype4Py.cusDoNotDisturb:
             
             if cleverSkype.running:
